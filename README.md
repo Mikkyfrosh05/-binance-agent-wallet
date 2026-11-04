@@ -8,7 +8,7 @@ A Model Context Protocol (MCP) server providing strictly read-only access to the
 
 - **Strictly Read-Only**: Only inspection tools (`wallet_status`, `wallet_address`, `wallet_balance_bsc`) are exposed. No write operations (such as token transfers, swaps, contract calls, or order placement) are supported or accessible.
 - **Credential Protection**: Wallet credentials, session files, and private keys are never committed, logged, or exposed across the network.
-- **Local / Codespaces First**: Designed to run securely inside GitHub Codespaces without exposing sensitive endpoints to the public internet.
+- **Port Visibility**: Keep port `3000` **Private** in Codespaces unless explicitly intended.
 
 ---
 
@@ -34,7 +34,15 @@ You can check status anytime with:
 npx baw wallet status
 ```
 
-### 3. Start the MCP Server
+### 3. Configure `MCP_PUBLIC_URL`
+Set your public Codespaces address so the OAuth authorization server advertises the public HTTPS URL:
+```bash
+export MCP_PUBLIC_URL="https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev"
+```
+
+*(Tip: You can also save it to a `.env` file by running `echo 'MCP_PUBLIC_URL="https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev"' > .env`)*
+
+### 4. Start (or Restart) the MCP Server
 In the terminal, run:
 ```bash
 npm start
@@ -42,19 +50,19 @@ npm start
 You should see:
 ```text
 Binance Agent Wallet MCP Server listening on port 3000
-Health endpoint: http://localhost:3000/health
-MCP endpoint: http://localhost:3000/mcp
-OAuth Issuer URL: http://localhost:3000/
+Health endpoint: https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/health
+MCP endpoint: https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/mcp
+OAuth Issuer URL: https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/
 ```
 
-### 4. Port Forwarding & Connecting Claude
-In GitHub Codespaces:
-1. Tap the **Ports** tab at the bottom.
-2. Port `3000` will be listed automatically.
-3. Keep the port visibility **Private** for safety.
-4. If testing Claude / MCP client locally, point your client configuration to:
-   - **Streamable HTTP URL**: `http://localhost:3000/mcp`
-   - **OAuth Discovery**: `http://localhost:3000/.well-known/oauth-authorization-server`
+To **restart** the server:
+1. Press `Ctrl + C` in the running terminal.
+2. Run `npm start`.
+
+### 5. Connecting Claude / MCP Clients
+Point your Claude or MCP client configuration to:
+- **Streamable HTTP URL**: `https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/mcp`
+- **OAuth Discovery**: `https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/.well-known/oauth-authorization-server`
 
 ---
 
@@ -72,7 +80,7 @@ All tools are strictly **read-only**:
 
 ## 🧪 Running Automated Tests
 
-To run the automated test suite covering `/health`, OAuth AS Discovery, Protected Resource Metadata, Dynamic Client Registration, PKCE authorization flow, token exchange, and MCP tool execution:
+To run the automated test suite:
 
 ```bash
 npm test
@@ -84,6 +92,7 @@ Expected output:
 
 Testing Health endpoint (/health)... ✅ PASS
 Testing OAuth 2.0 Authorization Server Discovery (RFC 8414)... ✅ PASS
+Testing MCP_PUBLIC_URL configuration propagation... ✅ PASS
 Testing OAuth 2.0 Protected Resource Metadata (RFC 9728)... ✅ PASS
 Testing Dynamic Client Registration (RFC 7591)... ✅ PASS
 Testing PKCE Authorization Request (/authorize)... ✅ PASS
@@ -94,7 +103,7 @@ Testing Streamable HTTP MCP Client Connection and Tool Calls... ✅ PASS
 Testing Strictly Read-Only Safety Verification... ✅ PASS
 
 =======================================
-Results: 10 passed, 0 failed.
+Results: 11 passed, 0 failed.
 =======================================
 ```
 

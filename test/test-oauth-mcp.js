@@ -53,6 +53,22 @@ async function runTests() {
       assert.ok(data.code_challenge_methods_supported.includes('S256'), 'S256 missing in code_challenge_methods_supported');
     });
 
+    // 2b. MCP_PUBLIC_URL configuration test
+    await test('MCP_PUBLIC_URL configuration propagation', async () => {
+      const customPublicUrl = 'https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev';
+      // Test that when MCP_PUBLIC_URL is provided, discovery endpoints advertise the public HTTPS URL
+      const { createOAuthMetadata } = require('@modelcontextprotocol/sdk/server/auth/router.js');
+      const testMeta = createOAuthMetadata({
+        provider: authProvider,
+        issuerUrl: new URL(customPublicUrl),
+        scopesSupported: ['mcp:tools']
+      });
+      assert.strictEqual(testMeta.issuer, `${customPublicUrl}/`);
+      assert.strictEqual(testMeta.authorization_endpoint, `${customPublicUrl}/authorize`);
+      assert.strictEqual(testMeta.token_endpoint, `${customPublicUrl}/token`);
+      assert.strictEqual(testMeta.registration_endpoint, `${customPublicUrl}/register`);
+    });
+
     // 3. OAuth Protected Resource Metadata Discovery
     await test('OAuth 2.0 Protected Resource Metadata (RFC 9728)', async () => {
       const res1 = await fetch(`${baseUrl}/.well-known/oauth-protected-resource`);

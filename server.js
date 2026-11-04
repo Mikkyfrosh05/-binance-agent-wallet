@@ -24,8 +24,8 @@ if (!process.env.MCP_DANGEROUSLY_ALLOW_INSECURE_ISSUER_URL) {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
-const issuerUrl = new URL(SERVER_URL);
+const PUBLIC_BASE_URL = (process.env.MCP_PUBLIC_URL || process.env.SERVER_URL || `http://localhost:${PORT}`).replace(/\/+$/, '');
+const issuerUrl = new URL(PUBLIC_BASE_URL);
 const mcpResourceUrl = new URL('/mcp', issuerUrl);
 
 // In-memory storage for OAuth state
@@ -436,8 +436,8 @@ app.delete('/mcp', authMiddleware, async (req, res) => {
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Binance Agent Wallet MCP Server listening on port ${PORT}`);
-    console.log(`Health endpoint: ${SERVER_URL}/health`);
-    console.log(`MCP endpoint: ${SERVER_URL}/mcp`);
+    console.log(`Health endpoint: ${PUBLIC_BASE_URL}/health`);
+    console.log(`MCP endpoint: ${PUBLIC_BASE_URL}/mcp`);
     console.log(`OAuth Issuer URL: ${issuerUrl.href}`);
   });
 }
