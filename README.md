@@ -34,7 +34,27 @@ You can check status anytime with:
 npx baw wallet status
 ```
 
-### 3. Start the MCP Server
+### 3. Configure Public URL for Codespaces (MCP_PUBLIC_URL)
+
+When hosting your server on GitHub Codespaces, you need the OAuth issuer and endpoints to advertise your HTTPS Codespaces URL instead of `localhost`.
+
+You can set `MCP_PUBLIC_URL` using either method below:
+
+#### Option A: Create or update a `.env` file (Recommended)
+In the terminal, run:
+```bash
+echo "MCP_PUBLIC_URL=https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev" >> .env
+```
+*(Replace with your current Codespaces URL if your workspace domain changes.)*
+
+#### Option B: Export the environment variable directly
+```bash
+export MCP_PUBLIC_URL="https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev"
+```
+
+---
+
+### 4. Start the MCP Server
 In the terminal, run:
 ```bash
 npm start
@@ -42,19 +62,21 @@ npm start
 You should see:
 ```text
 Binance Agent Wallet MCP Server listening on port 3000
-Health endpoint: http://localhost:3000/health
-MCP endpoint: http://localhost:3000/mcp
-OAuth Issuer URL: http://localhost:3000/
+Health endpoint: https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/health
+MCP endpoint: https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/mcp
+OAuth Issuer URL: https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/
 ```
 
-### 4. Port Forwarding & Connecting Claude
+---
+
+### 5. Port Forwarding & Connecting Claude
 In GitHub Codespaces:
 1. Tap the **Ports** tab at the bottom.
 2. Port `3000` will be listed automatically.
-3. Keep the port visibility **Private** for safety.
-4. If testing Claude / MCP client locally, point your client configuration to:
-   - **Streamable HTTP URL**: `http://localhost:3000/mcp`
-   - **OAuth Discovery**: `http://localhost:3000/.well-known/oauth-authorization-server`
+3. **Keep the port visibility Private** for security. Never change visibility to Public without authorization.
+4. Point your Claude / MCP client configuration to your HTTPS endpoints:
+   - **Streamable HTTP URL**: `https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/mcp`
+   - **OAuth Discovery**: `https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev/.well-known/oauth-authorization-server`
 
 ---
 

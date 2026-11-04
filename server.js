@@ -24,7 +24,8 @@ if (!process.env.MCP_DANGEROUSLY_ALLOW_INSECURE_ISSUER_URL) {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
+const rawPublicUrl = process.env.MCP_PUBLIC_URL || process.env.SERVER_URL || `http://localhost:${PORT}`;
+const SERVER_URL = rawPublicUrl.replace(/\/+$/, '');
 const issuerUrl = new URL(SERVER_URL);
 const mcpResourceUrl = new URL('/mcp', issuerUrl);
 

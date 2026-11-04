@@ -235,6 +235,51 @@ async function runTests() {
       }
     });
 
+    // 11. MCP_PUBLIC_URL configuration test
+    await test('MCP_PUBLIC_URL overrides issuer and discovery URLs correctly', async () => {
+      const { exec } = require('child_process');
+      const testPublicUrl = 'https://curly-space-enigma-q7v9qq499v95244p6-3000.app.github.dev';
+
+      await new Promise((resolve, reject) => {
+        exec(
+          `MCP_PUBLIC_URL="${testPublicUrl}" node -e "
+            const { app } = require('./server.js');
+            const s = app.listen(0, async () => {
+              try {
+                const port = s.address().port;
+                const asRes = await fetch('http://localhost:' + port + '/.well-known/oauth-authorization-server');
+                const asData = await asRes.json();
+                if (!asData.issuer.startsWith('${testPublicUrl}')) throw new Error('Issuer does not match public URL: ' + asData.issuer);
+                if (!asData.authorization_endpoint.startsWith('${testPublicUrl}')) throw new Error('Auth endpoint does not match public URL');
+                if (!asData.token_endpoint.startsWith('${testPublicUrl}')) throw new Error('Token endpoint does not match public URL');
+                if (!asData.registration_endpoint.startsWith('${testPublicUrl}')) throw new Error('Registration endpoint does not match public URL');
+                if (asData.issuer.includes('localhost')) throw new Error('Localhost found in issuer');
+
+                const prmRes = await fetch('http://localhost:' + port + '/.well-known/oauth-protected-resource/mcp');
+                const prmData = await prmRes.json();
+                if (!prmData.resource.startsWith('${testPublicUrl}/mcp')) throw new Error('PRM resource does not match public URL');
+                if (!prmData.authorization_servers[0].startsWith('${testPublicUrl}')) throw new Error('PRM AS does not match public URL');
+
+                s.close(() => process.exit(0));
+              } catch (e) {
+                s.close(() => {
+                  console.error(e);
+                  process.exit(1);
+                });
+              }
+            });
+          "`,
+          (error, stdout, stderr) => {
+            if (error) {
+              reject(new Error(stderr || stdout || error.message));
+            } else {
+              resolve();
+            }
+          }
+        );
+      });
+    });
+
   } finally {
     server.close();
   }
